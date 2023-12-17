@@ -1,24 +1,29 @@
-// DO NOT CHANGE THIS FILE
-#include "Game.hpp"
+﻿#include "Draughts.h"
+#include "ProjectConfig.h"
+#include "Resources.h"
+#include "SingleThreadGameRunner.h"
 
-int main(int argc, char *argv[])
+#include <cstdlib>
+#include <memory>
+#ifdef CONSOLE_STOP
+#    include <iostream>
+#endif
+
+int main(int, char *[])
 {
-    Game game;
-    srand(time(NULL));
-    if (!game.init())
-    {
-        printf("Failed to initialize!\n");
-        return 0;
-    }
-    // Load media
-    if (!game.loadMedia())
-    {
-        printf("Failed to load media!\n");
-        return 0;
-    }
+    Resources::init();
 
-    game.run();
-    game.close();
+    std::unique_ptr<Game> draughts = std::make_unique<Draughts>();
+    std::unique_ptr<GameRunner> gameRunner =
+        std::make_unique<SingleThreadGameRunner>(draughts.get(), Resources::UpdateRate);
 
-    return 0;
+    gameRunner->init();
+    gameRunner->run();
+
+#ifdef CONSOLE_STOP
+    std::cout << "Naciśnij dowolny przycisk by zakończyć..." << std::endl;
+    getchar();
+#endif
+
+    return EXIT_SUCCESS;
 }
